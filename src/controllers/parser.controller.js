@@ -7,8 +7,9 @@ export default class ParserController {
 
   async parseData(req, res, next) {
     const data = req.body;
+    const userId = req.user.id;
     try {
-      const result = await this.parserRepository.parseData(data);
+      const result = await this.parserRepository.parseData(data, userId);
 
       if (!result)
         return res.status(500).json({

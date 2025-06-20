@@ -36,7 +36,7 @@ export default class AuthController {
   }
 
   async login(req, res, next) {
-    const user = req.body;
+    const { accessFrom, ...user } = req.body.data || req.body;
     try {
       const validationError = validateUserInput(user, ["email", "password"]);
       if (validationError) {
@@ -47,7 +47,7 @@ export default class AuthController {
 
       const result = await this.authRepository.login(user);
 
-      const token = generateJwtToken(result, res);
+      const token = generateJwtToken(result, accessFrom, res);
 
       return res
         .status(200)

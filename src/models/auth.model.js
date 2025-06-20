@@ -9,9 +9,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email"],
     },
-    password: { type: String, required: true, trim: "true" },
+    password: { type: String, required: true, trim: true },
     firstName: { type: String, default: "" },
     lastName: { type: String, default: "" },
+    savedJobs: [{ type: mongoose.Schema.Types.ObjectId, ref: "Job" }],
   },
   { timestamps: true }
 );

@@ -1,7 +1,11 @@
 import jwt from "jsonwebtoken";
 
 export default function jwtAuth(req, res, next) {
-  const token = req.cookies?.jwt;
+  const token =
+    req.cookies?.jwt ||
+    (req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.split(" ")[1]
+      : null);
 
   if (!token) {
     return res.status(401).json({ success: false, message: "Unauthorized." });
@@ -9,13 +13,12 @@ export default function jwtAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = payload.userId;
-
+    req.user = { id: payload.userId };
     next();
   } catch (error) {
-    console.error(error);
+    console.error("JWT Verification Failed:", error.message);
     return res
-      .status(400)
+      .status(401)
       .json({ success: false, message: "Authentication failed." });
   }
 }
