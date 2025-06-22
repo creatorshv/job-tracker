@@ -18,7 +18,7 @@ export default class ParserRepository {
         await jobDoc.save();
       }
 
-      await UserModel.findByIdAndUpdate(
+      const updatedDocument = await UserModel.findByIdAndUpdate(
         userId,
         {
           $addToSet: {
@@ -27,6 +27,7 @@ export default class ParserRepository {
         },
         { returnDocument: "after" }
       );
+      return updatedDocument;
     } catch (error) {
       throw new Error(`ParserRepository Error: ${error.message}`);
     }
