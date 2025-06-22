@@ -26,9 +26,7 @@ export default class AuthController {
 
       const token = generateJwtToken(result, res);
 
-      return res
-        .status(201)
-        .json({ status: "success", response: result, token });
+      res.status(201).json({ status: "success", response: result, token });
     } catch (error) {
       console.error(error);
       next(error);
@@ -47,11 +45,15 @@ export default class AuthController {
 
       const result = await this.authRepository.login(user);
 
+      if (!result) {
+        return res
+          .status(401)
+          .json({ status: "failed", message: "Invalid email or password" });
+      }
+
       const token = generateJwtToken(result, accessFrom, res);
 
-      return res
-        .status(200)
-        .json({ status: "success", response: result, token });
+      res.status(200).json({ status: "success", response: result, token });
     } catch (error) {
       console.error(error);
       next(error);
@@ -65,7 +67,7 @@ export default class AuthController {
         sameSite: "strict",
         secure: process.env.NODE_ENV !== "development",
       });
-      return res
+      res
         .status(200)
         .json({ status: "success", response: "Logged out successfully" });
     } catch (error) {

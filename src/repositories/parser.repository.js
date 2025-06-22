@@ -18,14 +18,14 @@ export default class ParserRepository {
         await jobDoc.save();
       }
 
-      const updatedUser = await UserModel.findByIdAndUpdate(
+      await UserModel.findByIdAndUpdate(
         userId,
         {
           $addToSet: {
             savedJobs: jobDoc._id,
           },
         },
-        { returnDocument: "before" }
+        { returnDocument: "after" }
       );
     } catch (error) {
       throw new Error(`ParserRepository Error: ${error.message}`);

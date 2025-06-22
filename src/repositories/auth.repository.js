@@ -23,14 +23,10 @@ export default class AuthRepository {
   async login(userData) {
     try {
       const user = await UserModel.findOne({ email: userData.email });
-      if (!user) {
-        throw new Error("Invalid email or password");
-      }
+      if (!user) return null;
 
       const isMatch = await comparePassword(userData.password, user.password);
-      if (!isMatch) {
-        throw new Error("Invalid email or password");
-      }
+      if (!isMatch) return null;
 
       const { password, ...userWithoutPassword } = user.toObject();
       return userWithoutPassword;
