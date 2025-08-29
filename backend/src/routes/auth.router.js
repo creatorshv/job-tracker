@@ -5,6 +5,10 @@ import jwtAuth from "../middlewares/jwtAuth.js";
 const authRouter = express.Router();
 const authController = new AuthController();
 
+authRouter.get("/check-auth", jwtAuth, (req, res, next) => {
+  authController.checkAuth(req, res, next);
+});
+
 authRouter.post("/signup", (req, res, next) => {
   authController.signup(req, res, next);
 });

@@ -1,19 +1,26 @@
 import jwt from "jsonwebtoken";
 
+// user: User stored in DB
+// accessFrom: Determine access from extension or SPA
+// res: response object
 export default function generateJwtToken(user, accessFrom, res) {
+  // Validation checks
   if (!user._id) {
     throw new Error("User ID is required for JWT generation");
   }
-
   if (!accessFrom) {
     throw new Error("Access method is required for JWT generation");
   }
 
-  const expiresIn = accessFrom === "extension" ? "15m" : "7d";
+  // Expiry
+  const expiresIn = accessFrom === "extension" ? "3d" : "7d";
 
+  // Create token
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
     expiresIn,
   });
+
+  console.log(accessFrom, token);
 
   if (accessFrom === "webApp") {
     res.cookie("jwt", token, {
@@ -23,6 +30,8 @@ export default function generateJwtToken(user, accessFrom, res) {
       secure: process.env.NODE_ENV !== "development",
     });
   }
+
+  console.log("cookie is set");
 
   return token;
 }

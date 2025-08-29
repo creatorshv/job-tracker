@@ -2,16 +2,35 @@ import UserModel from "../models/auth.model.js";
 import { hashPassword, comparePassword } from "../lib/hashPassword.js";
 
 export default class AuthRepository {
-  async signup(user) {
+  // Check Auth
+  async checkAuth(userData) {
     try {
-      const hashedPassword = await hashPassword(user.password);
+      // Await the DB call
+      const user = await UserModel.findById(userData);
+      if (!user) return null;
 
+      const { password, ...userWithoutPassword } = user.toObject();
+      return userWithoutPassword;
+    } catch (error) {
+      console.error(error);
+      throw new Error(`Check Auth failed: ${error.message}`);
+    }
+  }
+
+  // Signup user
+  async signup(userData) {
+    try {
+      // Hash user password before storing
+      const hashedPassword = await hashPassword(userData.password);
+
+      // Store user to DB
       const newUser = new UserModel({
-        ...user,
+        ...userData,
         password: hashedPassword,
       });
       await newUser.save();
 
+      // Return user without password
       const { password, ...userWithoutPassword } = newUser.toObject();
       return userWithoutPassword;
     } catch (error) {
@@ -20,14 +39,18 @@ export default class AuthRepository {
     }
   }
 
+  // Login user
   async login(userData) {
     try {
+      // Find user in DB
       const user = await UserModel.findOne({ email: userData.email });
       if (!user) return null;
 
+      // Compare passwords
       const isMatch = await comparePassword(userData.password, user.password);
       if (!isMatch) return null;
 
+      // Return user without password
       const { password, ...userWithoutPassword } = user.toObject();
       return userWithoutPassword;
     } catch (error) {
@@ -36,6 +59,7 @@ export default class AuthRepository {
     }
   }
 
+  // TODO: Move logout logic to repository
   async logout() {
     try {
     } catch (error) {
