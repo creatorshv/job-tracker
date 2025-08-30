@@ -20,8 +20,6 @@ export default function generateJwtToken(user, accessFrom, res) {
     expiresIn,
   });
 
-  console.log(accessFrom, token);
-
   if (accessFrom === "webApp") {
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -30,8 +28,6 @@ export default function generateJwtToken(user, accessFrom, res) {
       secure: process.env.NODE_ENV !== "development",
     });
   }
-
-  console.log("cookie is set");
 
   return token;
 }

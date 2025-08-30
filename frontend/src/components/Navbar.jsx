@@ -1,96 +1,114 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { authSelector, logoutUser } from "../redux/authReducer";
+import { useEffect, useState } from "react";
+import navbarLinks from "../constants/linkConstants";
 
 const Navbar = () => {
+  // State to store hamburger visibility
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, isAuthenticated } = useSelector(authSelector);
+
+  // Navigate to login on logout success
+  useEffect(() => {
+    console.log(isAuthenticated); // remove in production
+
+    // Avoid premature navigation
+    if (!loading && !isAuthenticated) {
+      navigate("/login");
+    }
+  }, [loading, isAuthenticated, navigate]);
+
+  // Dispatch logout
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
+
   return (
     <>
-      <nav className="bg-white shadow-md">
+      <nav className="bg-gray-900 text-gray-100 shadow-lg">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           {/* Logo */}
-          <div className="text-2xl font-bold text-blue-600">Job Tracker</div>
+          <div className="text-2xl font-bold text-blue-500">Job Tracker</div>
 
-          {/* Links */}
-          <ul className="hidden md:flex space-x-6">
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
+          {/* Desktop Links */}
+          {isAuthenticated && (
+            <ul className="hidden lg:flex space-x-6">
+              {navbarLinks.map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-blue-400 font-semibold"
+                      : "text-gray-300 hover:text-blue-400"
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </ul>
+          )}
+
+          {/* Desktop Logout */}
+          <div className="hidden lg:block">
+            {/* Only show logout button if user is logged in */}
+            {isAuthenticated && (
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            )}
+          </div>
+
+          {/* Mobile Hamburger */}
+          {/* Display only when user is logged in */}
+          {isAuthenticated && (
+            <div
+              className="lg:hidden text-gray-300 cursor-pointer text-2xl"
+              onClick={() => setMenuOpen((prev) => !prev)}
             >
-              Dashboard
-            </NavLink>
+              ☰
+            </div>
+          )}
+        </div>
 
-            <NavLink
-              to="/add-job"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
+        {/* Mobile Menu */}
+        {/* Display only when user is logged in */}
+        {isAuthenticated && menuOpen && (
+          <div className="lg:hidden bg-gray-800 px-4 py-3 space-y-3">
+            {navbarLinks.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  isActive
+                    ? "block text-blue-400 font-semibold"
+                    : "block text-gray-300 hover:text-blue-400"
+                }
+                onClick={() => setMenuOpen(false)}
+              >
+                {label}
+              </NavLink>
+            ))}
+
+            {/* Hamburger logout button */}
+            <button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-2"
+              onClick={() => {
+                setMenuOpen(false);
+                handleLogout();
+              }}
             >
-              Add Job
-            </NavLink>
-
-            <NavLink
-              to="/applications"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
-            >
-              Applications
-            </NavLink>
-
-            <NavLink
-              to="/saved-jobs"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
-            >
-              Saved Jobs
-            </NavLink>
-
-            <NavLink
-              to="/analytics"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
-            >
-              Analytics
-            </NavLink>
-
-            <NavLink
-              to="/profile"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-blue-600 font-semibold"
-                  : "text-gray-600 hover:text-blue-600"
-              }
-            >
-              Profile
-            </NavLink>
-          </ul>
-
-          {/* Logout Button */}
-          <div className="hidden md:block">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
               Logout
             </button>
           </div>
-
-          {/* Mobile Menu (Optional) */}
-          <div className="md:hidden text-gray-700 cursor-pointer">
-            {/* You can add a hamburger menu icon here */}☰
-          </div>
-        </div>
+        )}
       </nav>
-      <Outlet />
     </>
   );
 };
